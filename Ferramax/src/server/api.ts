@@ -1,4 +1,5 @@
-import { Product, Client } from '../shared/task'
+import { Product } from '../shared/product'
+import { Client } from '../shared/client'
 import {remultExpress} from 'remult/remult-express'
 export const api = remultExpress({
     entities: [Product, Client],
