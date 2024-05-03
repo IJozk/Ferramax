@@ -8,6 +8,4 @@ export class Empleados {
     name = "";
     @Fields.date()
     fechanacimiento = new Date();
-    @Fields.createdAt()
-    createdAt?: Date
 }
