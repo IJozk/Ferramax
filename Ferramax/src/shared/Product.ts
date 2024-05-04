@@ -1,13 +1,16 @@
 import { Entity, Fields } from "remult";
 
-@Entity("clients", { allowApiCrud: true })
-export class Client {
+@Entity("products", { allowApiCrud: true })
+export class Product {
     @Fields.autoIncrement()
     id = 0;
+
     @Fields.string()
-    name = "";
-    @Fields.string()
-    mail = "";
+    prod_name = "";
+
+    @Fields.integer()
+    current_price = 0;
+    
     @Fields.createdAt()
     createdAt?: Date
 }

@@ -1,7 +1,11 @@
-import { Product } from '../shared/product'
-import { Client } from '../shared/client'
-import {remultExpress} from 'remult/remult-express'
+// src/server/api.ts
+
+import { remultExpress } from 'remult/remult-express'
+import { Client } from '../shared/Client'
+import { Employee } from '../shared/Employee'
+import { Product } from '../shared/Product'
+
 export const api = remultExpress({
-    entities: [Product, Client], // Add entities to app
-    admin: true, // Enable the Admin UI
+    entities: [Client, Employee, Product],
+    admin: true,
 })
