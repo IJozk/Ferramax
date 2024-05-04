@@ -6,7 +6,7 @@ export class Product {
     id = 0;
     @Fields.string()
     prod_name = '';
-    @Fields.integer()
+    @Fields.number()
     current_price = 0;
     @Fields.createdAt()
     createdAt?: Date
