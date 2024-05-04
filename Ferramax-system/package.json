@@ -12,7 +12,6 @@
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
-    "exppress": "^0.0.1-security",
     "express": "^4.19.2",
     "remult": "^0.26.10",
     "vue": "^3.4.21"
