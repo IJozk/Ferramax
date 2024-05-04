@@ -1,11 +1,11 @@
 import { Entity, Fields } from "remult";
 
-@Entity("products", { allowApiCrud: true })
+@Entity('products',{ allowApiCrud: true })
 export class Product {
     @Fields.autoIncrement()
     id = 0;
     @Fields.string()
-    prod_name = "";
+    prod_name = '';
     @Fields.integer()
     current_price = 0;
     @Fields.createdAt()
