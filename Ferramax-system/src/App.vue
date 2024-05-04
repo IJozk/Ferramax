@@ -10,7 +10,7 @@
 </script>
 <template>
   <div>
-    <h1>todos</h1>
+    <h1>Ferramax</h1>
     <main>
       <div v-for="product in products" v-bind:key="product.id">
         <input type="numeric" v-model="product.current_price" />
