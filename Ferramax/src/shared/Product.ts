@@ -5,7 +5,11 @@ export class Product {
     @Fields.autoIncrement()
     id = 0;
 
-    @Fields.string()
+    @Fields.string<Product>({
+        validate: (product) => {
+            if (product.prod_name.length < 3) throw "Nombre demasiado corto"
+        }
+    })
     prod_name = "";
 
     @Fields.integer()
