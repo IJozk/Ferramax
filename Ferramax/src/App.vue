@@ -1,19 +1,28 @@
 
 <script setup lang="ts">
-  import { onMounted, ref } from "vue";
+  import { onMounted, onUnmounted, ref } from "vue";
   import { remult } from "remult";
   import { Product } from "./shared/Product";
 
   const productRepo = remult.repo(Product);
   const products = ref<Product[]>([]);
-  onMounted(() => productRepo.find().then((items) => (products.value = items)));
+  //onMounted(() => productRepo.find().then((items) => (products.value = items)));
+  onMounted(() => 
+    onUnmounted(
+      productRepo
+        .liveQuery({
+          limit: 20,
+          orderBy: { createdAt: "asc" }
+        })
+        .subscribe(info => (products.value = info.applyChanges(products.value)))
+    ))
 
   const newProductName = ref("")
   const newProductPrice = ref()
   async function addProduct() {
     try {
       const newTask = await productRepo.insert({prod_name: newProductName.value, current_price: newProductPrice.value })
-      products.value.push(newTask)
+      //products.value.push(newTask)
       newProductName.value = ""
     } catch (error: any) {
       alert((error as { message: string }).message)
@@ -31,7 +40,7 @@
   async function deleteProduct(product: Product) { 
     try{
       await productRepo.delete(product)
-      products.value = products.value.filter(t => product !== t)
+      //products.value = products.value.filter(t => product !== t)
     } catch (error: any) {
       alert((error as { message: string }).message)
     }
