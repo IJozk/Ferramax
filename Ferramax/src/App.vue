@@ -28,6 +28,15 @@ async function saveProduct(product: Product) {
   }
 }
 
+async function deleteProduct(product: Product) {
+  try {
+    await productsRepo.delete(product)
+    products.value = products.value.filter(p => product !== p)
+  } catch (error: any) {
+    alert((error as { message: string }).message)
+  }
+}
+
 
 </script>
 
@@ -45,6 +54,7 @@ async function saveProduct(product: Product) {
         {{ product.prod_name }}
         <input type="numeric" v-model="product.current_price"  @change="saveProduct(product)"/>
         <button @click="saveProduct(product)">Modificar</button>
+        <button @click="deleteProduct(product)">Delete</button>
       </div>
     </main>
   </div>
