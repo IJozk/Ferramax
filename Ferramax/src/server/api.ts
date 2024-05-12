@@ -1,5 +1,5 @@
-import { Product } from '../shared/product'
-import { Client } from '../shared/client'
+import { Product } from '../shared/Product'
+import { Client } from '../shared/Client'
 import { remultExpress } from 'remult/remult-express'
 import { createKnexDataProvider } from 'remult/remult-knex';
 import dotenv from 'dotenv';

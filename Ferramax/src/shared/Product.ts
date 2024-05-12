@@ -3,7 +3,7 @@ import { Entity, Fields, Allow } from "remult";
 @Entity("products", { 
     allowApiCrud: Allow.authenticated,
     allowApiInsert: "admin",
-    allowApiDelete: "admin", 
+    allowApiDelete: "admin",
 })
 export class Product {
 
