@@ -1,8 +1,8 @@
 // src/main.ts
 
 import { createApp } from "vue"
-import Auth from "./Auth.vue"
+import App from "./App.vue"
 
 import "./assets/main.css"
 
-createApp(Auth).mount("#app")
+createApp(App).mount("#app")

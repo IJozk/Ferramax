@@ -5,9 +5,7 @@ export class Employee {
     @Fields.autoIncrement()
     id = 0;
 
-    @Fields.string({
-        validate: Validators.required
-    })
+    @Fields.string()
     name = "";
     
     @Fields.date()

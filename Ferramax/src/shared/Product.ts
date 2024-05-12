@@ -1,10 +1,6 @@
 import { Entity, Fields, Allow } from "remult";
 
-@Entity("products", { 
-    allowApiCrud: Allow.authenticated,
-    allowApiInsert: "admin",
-    allowApiDelete: "admin",
-})
+@Entity("products", { allowApiCrud: true})
 export class Product {
 
     @Fields.autoIncrement()
@@ -14,7 +10,6 @@ export class Product {
         validate: (product) => {
             if (product.prod_name.length < 3) throw "Nombre demasiado corto"
         },
-        allowApiUpdate: "admin",
     })
     prod_name = "";
 
