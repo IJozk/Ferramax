@@ -1,8 +1,7 @@
-import { Product } from '../shared/Product'
-import { Client } from '../shared/Client'
 import { remultExpress } from 'remult/remult-express'
 import { createKnexDataProvider } from 'remult/remult-knex';
 import dotenv from 'dotenv';
+import { Product } from '@/shared/product';
 
 dotenv.config();
 
@@ -12,7 +11,7 @@ const DB_USER = process.env["DB_USER"];
 const DB_PASSWD = process.env["DB_PASSWD"];
 const DB_PORT = process.env["DB_PORT"];
 
-export const api = remultExpress({
+export const knexConfig = remultExpress({
     dataProvider: await createKnexDataProvider({
         // Knex client configuration for Postgres
         client: "pg",
@@ -27,8 +26,7 @@ export const api = remultExpress({
               }
           }
       }),
-    entities: [Product, Client], // Add entities to app
+    entities: [Product], // Add entities to app
     admin: true, // Enable the Admin UI
+    ensureSchema: false,
 })
-
-

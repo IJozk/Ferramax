@@ -1,5 +1,0 @@
-DATABASE_URL=ferramax.czag2q066koz.sa-east-1.rds.amazonaws.com
-DB_NAME=ferramax
-DB_USER=ferradmin
-DB_PASSWD=ferradmin123
-DB_PORT=5432
