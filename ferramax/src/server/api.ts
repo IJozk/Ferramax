@@ -11,7 +11,7 @@ const DB_USER = process.env["DB_USER"];
 const DB_PASSWD = process.env["DB_PASSWD"];
 const DB_PORT = process.env["DB_PORT"];
 
-export const db = remultExpress({
+export const api = remultExpress({
     dataProvider: await createKnexDataProvider({
         // Knex client configuration for Postgres
         client: "pg",

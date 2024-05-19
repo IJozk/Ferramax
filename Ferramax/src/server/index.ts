@@ -1,7 +1,7 @@
 import express from "express";
-import { db } from "./db";
+import { api } from "./api";
 
 const app = express();
-app.use(db);
-app.get("/db/hi", (req, res) => res.send("Hello"));
+app.use(api);
+app.get("/api/hi", (req, res) => res.send("Hello"));
 app.listen(3002, () => console.log("started :)"));
