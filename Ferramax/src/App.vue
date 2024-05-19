@@ -1,53 +1,88 @@
-
 <script setup lang="ts">
-  import { onMounted, ref } from "vue";
-  import { remult } from "remult";
-  import { Product } from "./shared/Product";
+import { RouterLink, RouterView } from 'vue-router'
 
-  const productRepo = remult.repo(Product);
-  const products = ref<Product[]>([]);
-  onMounted(() => productRepo.find().then((items) => (products.value = items)));
-
-  const newProductName = ref("")
-  const newProductPrice = ref()
-  async function addProduct() {
-    try {
-      const newTask = await productRepo.insert({prod_name: newProductName.value, current_price: newProductPrice.value })
-      products.value.push(newTask)
-      newProductName.value = ""
-    } catch (error: any) {
-      alert((error as { message: string }).message)
-    }
-  }
-
-  async function saveProduct(product: Product) {
-  try {
-    await productRepo.save(product)
-  } catch (error: any) {
-    alert((error as { message: string }).message)
-  }
-}
-  
 </script>
 
 <template>
-  <div>
-    <h1>Ferramax</h1>
-    <main>
-      <!-- Ingresar producto -->
-      <form @submit.prevent="addProduct()">
-        <input v-model="newProductName" placeholder="Qué titulo deseas insertar?" />
-        <input type="numeric" v-model="newProductPrice" placeholder="Valor" />
-        <button>Guardar</button>
-      </form>
+  <header>
+    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
 
-      <!-- Modificar producto -->
+    <div class="wrapper">
+      <HelloWorld msg="You did it!" />
 
-      <div v-for="product in products" v-bind:key="product.id">
-        <input type="numeric" v-model="product.current_price" @change="saveProduct(product)" />
-        <input v-model="product.prod_name" />
-        <button @click="saveProduct(product)">Guardar</button>
-      </div>
-    </main>
-  </div>
+      <strong>Path route: </strong> {{ $route.fullPath }}
+      <nav>
+        <RouterLink to="/">Home</RouterLink>
+        <RouterLink to="/about">About</RouterLink>
+        <RouterLink to="/productos">Productos</RouterLink>
+        <RouterLink to="/consultaView">consultaView</RouterLink>
+      </nav>
+    </div>
+  </header>
+
+  <RouterView />
 </template>
+
+<style scoped>
+header {
+  line-height: 1.5;
+  max-height: 100vh;
+}
+
+.logo {
+  display: block;
+  margin: 0 auto 2rem;
+}
+
+nav {
+  width: 100%;
+  font-size: 12px;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+nav a.router-link-exact-active {
+  color: var(--color-text);
+}
+
+nav a.router-link-exact-active:hover {
+  background-color: transparent;
+}
+
+nav a {
+  display: inline-block;
+  padding: 0 1rem;
+  border-left: 1px solid var(--color-border);
+}
+
+nav a:first-of-type {
+  border: 0;
+}
+
+@media (min-width: 1024px) {
+  header {
+    display: flex;
+    place-items: center;
+    padding-right: calc(var(--section-gap) / 2);
+  }
+
+  .logo {
+    margin: 0 2rem 0 0;
+  }
+
+  header .wrapper {
+    display: flex;
+    place-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  nav {
+    text-align: left;
+    margin-left: -1rem;
+    font-size: 1rem;
+
+    padding: 1rem 0;
+    margin-top: 1rem;
+  }
+}
+</style>
