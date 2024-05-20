@@ -3,7 +3,7 @@ import { Entity, Fields } from "remult";
 
 @Entity('stock_tienda', { allowApiCrud: true })
 export class StockTienda {
-    @Fields.autoIncrement()
+    @Fields.number()
     stock_prod = 0;
     @Fields.number()
     descuento_tienda = 0;

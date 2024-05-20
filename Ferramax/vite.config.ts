@@ -22,7 +22,8 @@ export default defineConfig({
         target: 'https://66bb7737-6cbf-4a5c-ad15-30241155c89c-00-3df4wwz9ec4so.worf.replit.dev:3001/',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/APIconsulta/, '')
-      }
+      },
+      "/api": "http://localhost:3002"
     }
   }
 });

@@ -1,3 +1,19 @@
+
+import { Boleta } from '../shared/boleta'
+import { Categoria } from '../shared/categoria';
+import { Cliente } from '../shared/cliente';
+import { DetalleBoleta } from '../shared/detalle_boleta';
+import { Empleado } from '../shared/empleado';
+import { EstadoUnidad } from '../shared/estado_unidad';
+import { MetodoPago } from '../shared/metodo_pago';
+import { Pedido } from '../shared/pedido';
+import { ProductoAsignadoPedido } from '../shared/producto_asignado_pedido';
+import { Rol } from '../shared/rol';
+import { StockTienda } from '../shared/stock_tienda';
+import { Sucursal } from '../shared/sucursal';
+import { TipoEmpleado } from '../shared/tipo_empleado';
+import { UnidadProducto } from '../shared/unidad_producto';
+import { Usuario } from '../shared/usuario';
 import { remultExpress } from 'remult/remult-express'
 import { createKnexDataProvider } from 'remult/remult-knex';
 import dotenv from 'dotenv';
@@ -28,7 +44,24 @@ export const api = remultExpress({
               }
           }
       }),
-    entities: [Categoria, Cliente], // Add entities to app
+      entities: [
+        Boleta,
+        Categoria,
+        Cliente,
+        DetalleBoleta,
+        Empleado,
+        EstadoUnidad,
+        MetodoPago,
+        Pedido,
+        ProductoAsignadoPedido,
+        Rol,
+        StockTienda,
+        Sucursal,
+        TipoEmpleado,
+        UnidadProducto,
+        Usuario
+    ], // Add entities to app
+
     admin: true, // Enable the Admin UI
 })
 

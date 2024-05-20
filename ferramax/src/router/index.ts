@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import SucursalView from '../views/SucursalView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -23,6 +24,21 @@ const router = createRouter({
       path: '/consultaView',
       name: 'consultaView',
       component: () => import('../views/ConsultaView.vue')
+    },
+    {
+      path: '/sucursalView',
+      name: 'SucursalView',
+      component: SucursalView
+    },
+    {
+      path: '/stockView',
+      name: 'stockView',
+      component: () => import('../views/stockView.vue')
+    },
+    {
+      path: '/respuestaView',
+      name: 'respuestaView',
+      component: () => import('../views/RespuestaView.vue')
     },
   ]
 })

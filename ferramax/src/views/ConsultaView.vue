@@ -17,8 +17,7 @@
           <p><strong>Fecha:</strong> {{ consulta.fecha_creacion }}</p>
           <p><strong>Consulta:</strong> {{ consulta.consulta }}</p>
           <p><strong>Respuesta:</strong> {{ consulta.respuesta }}</p>
-          <p><strong>RUT Cliente:</strong> {{ consulta.rut_cliente }}</p>
-          <p><strong>RUT Empleado:</strong> {{ consulta.rut_empleado }}</p>
+          <p><strong>RUT Cliente:</strong> {{ consulta.rut_cliente }}</p>  
         </div>
       </main>
     </div>
