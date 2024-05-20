@@ -459,3 +459,19 @@ INSERT INTO sucursal (id_sucursal, nombre_sucursal)
 			(2,	'Ferramax  Concepción'),
 			(3,	'Ferramax  Arica'),
 			(4,	'Ferramax  Punta Arenas');
+
+
+-- Datos de prueba
+
+INSERT INTO public.cliente(
+    rut_cliente, dv, nombre, apellido, direccion, id_usuario)
+    VALUES (1111111, '1', 'Adan', 'El primero', 'Eden 1', null),
+    VALUES (1111112, '1', 'Eva', 'La pecadora', 'Eden 1', null);
+	
+INSERT INTO public.empleado(rut_empleado, dv, direccion, nombre, apellido, id_tipo_empleado, fecha_nacimiento, fecha_incorporacion, id_usuario)
+    VALUES 	(11111113, '3', 'tucapel 1244', 'Manuel', 'Herrera', 1, '2000-05-12', '2024-05-12', null),
+			(11111114, '4', 'Bulnes 23', 'Matias', 'Basico', 2, '2000-05-12', '2024-05-12', null),
+			(11111116, '5', 'Caupolican 55', 'Sebastian', 'Segura', 3, '2000-05-12', '2024-05-12', null),
+			(11111117, '6', 'Angol 6443', 'Tornillo', 'Anclaje', 4, '2000-05-12', '2024-05-12', null),
+			(11111118, '7', 'Salas 44', 'Fijon', 'Adhesivo', 5, '2000-05-12', '2024-05-12', null),
+			(11111119, '8', 'Orompello 777', 'Medina', 'Medina', 6, '2000-05-12', '2024-05-12', null);
