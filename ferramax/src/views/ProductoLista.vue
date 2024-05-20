@@ -1,9 +1,13 @@
 <template>
   <div v-if="productos.length === 0">No hay productos disponibles</div>
   <div v-for="producto in productos" :key="producto.cod_producto">
-    <h3>{{ producto.nombre_producto }} ${{ producto.precio_actual }}</h3>
-    <p>{{ producto.descripcion_producto }}</p>
-    <p>{{ producto.marca }}</p>
+    <br>
+    <h3> ID: {{ producto.cod_producto }} </h3>
+    <h3> Nombre: {{ producto.nombre_producto }} - ${{ producto.precio_actual }}</h3>
+    <p> Desc: {{ producto.descripcion_producto }}</p>
+    <p> Marca: {{ producto.marca }}</p>
+    <br>
+    <hr>
   </div>
 </template>
 

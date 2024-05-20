@@ -2,6 +2,7 @@
   <div>
     <h1>Ferramax</h1>
     <main>
+
       <!-- Formulario para agregar un nuevo producto -->
       <form @submit.prevent="addProduct">
         <input v-model="newProduct.nombre_producto" placeholder="Nombre del producto" required />
@@ -64,6 +65,7 @@ async function addProduct() {
     alert(error.message);
   }
 }
+
 </script>
 
 <style scoped>
