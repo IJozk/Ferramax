@@ -1,7 +1,9 @@
-import { Product } from '../shared/product'
 import { remultExpress } from 'remult/remult-express'
 import { createKnexDataProvider } from 'remult/remult-knex';
 import dotenv from 'dotenv';
+import { Categoria } from '../shared/categoria';
+import { Cliente } from '../shared/cliente';
+
 
 dotenv.config();
 
@@ -26,7 +28,7 @@ export const api = remultExpress({
               }
           }
       }),
-    entities: [Product], // Add entities to app
+    entities: [Categoria, Cliente], // Add entities to app
     admin: true, // Enable the Admin UI
 })
 

@@ -13,10 +13,10 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/api": {
+      "/apiProducto": {
         target: 'https://a664615f-f965-4661-ae43-67e040721d30-00-s66hv8tg1s0d.kirk.replit.dev:3001/',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
+        rewrite: (path) => path.replace(/^\/apiProducto/, '')
       },
       "/APIconsulta": {
         target: 'https://66bb7737-6cbf-4a5c-ad15-30241155c89c-00-3df4wwz9ec4so.worf.replit.dev:3001/',
