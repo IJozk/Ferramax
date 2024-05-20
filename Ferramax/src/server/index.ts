@@ -1,35 +1,42 @@
-import express from "express";
+import express, { Router } from "express";
+import { remultExpress } from "remult/remult-express";
+import { Usuario } from "../shared/usuario";
+
 import { api } from "./api";
 import { Remult } from 'remult';
 import { TipoEmpleado } from "../shared/tipo_empleado";
 import { Empleado } from "../shared/empleado";
+import session from "cookie-session";
+import { auth } from "./auth"
 
 const app = express();
-const remult = new Remult();
+const api = remultExpress();
 
 app.use(api);
 
-app.get("/api/hi", (req, res) => res.send("Hello"));
+const auth = Router();
+auth.use(express.json());
 
-// Endpoint para obtener empleados por categoría
-app.get('/api/empleados/:id_categoria', async (req, res) => {
-    const id_categoria = parseInt(req.params.id_categoria);
-    try {
-        const tipoEmpleadoRepo = remult.repo(TipoEmpleado);
-        const empleadoRepo = remult.repo(Empleado);
-
-        // Busca los tipos de empleado que pertenecen a la categoría seleccionada
-        const tipoEmpleados = await tipoEmpleadoRepo.find({ where: { id_categoria } });
-        const tipoEmpleadoIds = tipoEmpleados.map(te => te.id_tipo_empleado);
-
-        // Busca los empleados que tienen uno de los tipos de empleado encontrados
-        const empleados = await empleadoRepo.find({ where: { id_tipo_empleado: tipoEmpleadoIds } });
-
-        res.json({ empleados });
-    } catch (error) {
-        console.error("Error al obtener empleados:", error);
-        res.status(500).send("Error al obtener empleados");
-    }
+auth.post("/api/signIn", async (req, res) => {
+  const usuarioRepo: Repository<Usuario> = remult.repo(Usuario);
+  const user = await usuarioRepo.findFirst({ correo: req.body.username });
+  if (user && user.clave === req.body.password) {
+    req.session!["user"] = user;
+    res.json(user);
+  } else {
+    res.status(404).json("Usuario inválido, intenta nuevamente");
+  }
 });
+
+auth.post("/api/signOut", (req, res) => {
+  req.session!["user"] = null;
+  res.json("Cerraste sesión");
+});
+
+auth.get("/api/currentUser", (req, res) => {
+  res.json(req.session!["user"]);
+});
+
+app.use(auth);
 
 app.listen(3002, () => console.log("started :)"));
