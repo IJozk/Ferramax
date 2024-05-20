@@ -2,13 +2,19 @@
   <div>
     <h1>Ferramax</h1>
     <main>
-
       <!-- Formulario para agregar un nuevo producto -->
       <form @submit.prevent="addProduct">
         <input v-model="newProduct.nombre_producto" placeholder="Nombre del producto" required />
         <input v-model="newProduct.precio_actual" type="number" placeholder="Precio" required />
         <input v-model="newProduct.descripcion_producto" placeholder="Descripción" required />
-        <input v-model="newProduct.id_categoria" type="number" placeholder="ID Categoría" required />
+        
+        <!-- Input de categoría con opciones cargadas desde la BBDD -->
+        <select v-model="newProduct.id_categoria" required>
+          <option v-for="categoria in categorias" :key="categoria.id_categoria" :value="categoria.id_categoria">
+            {{ categoria.nombre_categoria }}
+          </option>
+        </select>
+        
         <input v-model="newProduct.marca" placeholder="Marca" required />
         <button type="submit">Añadir</button>
       </form>
@@ -29,7 +35,6 @@
           <p>-------------------------------------------------------</p>
         </div>
       </div>
-
     </main>
     <footer>
       <div>
@@ -48,6 +53,12 @@
 import { ref, reactive, onMounted } from 'vue';
 
 // Definición de tipos
+interface Categoria {
+  id_categoria: number;
+  nombre_categoria: string;
+  id_tipo_empleado: number;
+}
+
 interface Producto {
   cod_producto: string;
   nombre_producto: string;
@@ -87,6 +98,7 @@ const newProduct = reactive<NewProduct>({
   id_categoria: 0,
   marca: ""
 });
+const categorias = ref<Categoria[]>([]);
 
 // Métodos
 async function fetchProducts() {
@@ -131,6 +143,19 @@ async function fetchExchangeRates() {
     console.log('Exchange rates loaded:', exchangeRates); // Debugging line
   } catch (error) {
     console.error('Error fetching exchange rates:', error);
+  }
+}
+
+async function fetchCategorias() {
+  try {
+    const response = await fetch('/apiProducto/categorias');
+    if (!response.ok) {
+      throw new Error('Network response was not ok ' + response.statusText);
+    }
+    const data = await response.json();
+    categorias.value = data.categorias;
+  } catch (error) {
+    console.error('Error fetching categories:', error);
   }
 }
 
@@ -190,6 +215,7 @@ async function addProduct() {
 onMounted(() => {
   fetchProducts();
   fetchExchangeRates();
+  fetchCategorias();
 });
 </script>
 
