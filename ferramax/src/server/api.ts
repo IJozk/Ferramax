@@ -17,8 +17,7 @@ import { Usuario } from '../shared/usuario';
 import { remultExpress } from 'remult/remult-express'
 import { createKnexDataProvider } from 'remult/remult-knex';
 import dotenv from 'dotenv';
-import { Categoria } from '../shared/categoria';
-import { Cliente } from '../shared/cliente';
+
 
 
 dotenv.config();
