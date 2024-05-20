@@ -36,7 +36,7 @@ const newProduct = ref({
 // Función para añadir un producto
 async function addProduct() {
   try {
-    const response = await fetch('/api/productos/new_product/', {
+    const response = await fetch('/apiProducto/productos/new_product/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

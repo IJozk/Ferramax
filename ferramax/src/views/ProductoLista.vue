@@ -20,7 +20,7 @@ export default {
   methods: {
     async fetchProducts() {
       try {
-        const response = await fetch('/api/productos');
+        const response = await fetch('/apiProducto/productos');
         if (!response.ok) {
           throw new Error('Network response was not ok ' + response.statusText);
         }
