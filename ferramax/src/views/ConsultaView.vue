@@ -7,7 +7,25 @@
         <input v-model="newConsulta.fecha_creacion" type="date" placeholder="Fecha de creación" required />
         <input v-model="newConsulta.consulta" placeholder="Consulta" required />
         <input v-model="newConsulta.respuesta" placeholder="Respuesta" />
-        <input v-model="newConsulta.rut_cliente" placeholder="RUT Cliente" required />        <button type="submit">Añadir</button>
+        <input v-model="newConsulta.rut_cliente" placeholder="RUT Cliente" required />
+
+        <!-- Select para categorías -->
+        <select v-model="selectedCategory" @change="fetchEmpleados">
+          <option value="">Seleccione una categoría</option>
+          <option v-for="categoria in categorias" :key="categoria.id_categoria" :value="categoria.id_categoria">
+            {{ categoria.nombre_categoria }}
+          </option>
+        </select>
+
+        <!-- Select para empleados -->
+        <select v-model="newConsulta.rut_empleado" required>
+          <option value="">Seleccione un empleado</option>
+          <option v-for="empleado in empleados" :key="empleado.rut_empleado" :value="empleado.rut_empleado">
+            {{ empleado.nombre }} {{ empleado.apellido }}
+          </option>
+        </select>
+
+        <button type="submit">Añadir</button>
       </form>
 
       <!-- Lista de consultas -->
@@ -25,6 +43,7 @@
   </div>
 </template>
 
+
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 
@@ -39,6 +58,13 @@ const newConsulta = ref({
 
 // Lista de consultas
 const consultas = ref([]);
+
+// Lista de categorías y empleados
+const categorias = ref([]);
+const empleados = ref([]);
+
+// Categoría seleccionada
+const selectedCategory = ref('');
 
 // Función para obtener todas las consultas
 async function fetchConsultas() {
@@ -56,6 +82,55 @@ async function fetchConsultas() {
 
     const data = await response.json();
     consultas.value = data.consultas;
+  } catch (error) {
+    console.error('Error:', error);
+    alert(error.message);
+  }
+}
+
+// Función para obtener todas las categorías
+async function fetchCategorias() {
+  try {
+    const response = await fetch('/apiProducto/categorias', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al obtener categorías: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    categorias.value = data.categorias;
+  } catch (error) {
+    console.error('Error:', error);
+    alert(error.message);
+  }
+}
+
+// Función para obtener empleados por categoría
+async function fetchEmpleados() {
+  if (!selectedCategory.value) {
+    empleados.value = [];
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/empleados/${selectedCategory.value}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al obtener empleados: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    empleados.value = data.empleados;
   } catch (error) {
     console.error('Error:', error);
     alert(error.message);
@@ -95,73 +170,78 @@ async function addConsulta() {
   }
 }
 
-// Obtener consultas al montar el componente
-onMounted(fetchConsultas);
+// Obtener consultas y categorías al montar el componente
+onMounted(() => {
+  fetchConsultas();
+  fetchCategorias();
+});
 </script>
 
-  <style scoped>
-  @charset "utf-8";
-  
-  body {
-    font-family: Arial;
-    background-color: rgb(46, 46, 46);
-    justify-content: center;
-    margin: 0;
-  }
-  
-  h1 {
-    color: #ef4444;
-    font-style: italic;
-    font-size: 3.75rem;
-    font-weight: inherit;
-    text-align: center;
-  }
-  
-  main {
-    max-width: 500px;
-    min-width: 300px;
-    margin: auto;
-    background-color: rgb(41, 41, 41);
-    box-sizing: border-box;
-    border: 1px solid rgb(48, 47, 47);
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 4px #0003, 0 25px 50px #0000001a;
-  }
-  
-  main > form {
-    padding: 0.5rem 1rem;
-    border-bottom: 1px solid lightgray;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-  
-  main > div {
-    padding: 0.5rem 1rem;
-    border-bottom: 1px solid lightgray;
-  }
-  
-  input {
-    font-family: inherit;
-    font-size: 100%;
-    width: 100%;
-    border: 0;
-  }
-  
-  input:placeholder-shown {
-    font-style: italic;
-  }
-  
-  button {
-    cursor: pointer;
-    padding: 0.5rem 0.5rem;
-    background-color: white;
-    font-family: inherit;
-    font-size: 85%;
-    line-height: inherit;
-    border: 2px solid #0000001a;
-    border-radius: 0.5rem;
-    white-space: nowrap;
-  }
-  </style>
-  
+
+
+
+<style scoped>
+@charset "utf-8";
+
+body {
+  font-family: Arial;
+  background-color: rgb(46, 46, 46);
+  justify-content: center;
+  margin: 0;
+}
+
+h1 {
+  color: #ef4444;
+  font-style: italic;
+  font-size: 3.75rem;
+  font-weight: inherit;
+  text-align: center;
+}
+
+main {
+  max-width: 500px;
+  min-width: 300px;
+  margin: auto;
+  background-color: rgb(41, 41, 41);
+  box-sizing: border-box;
+  border: 1px solid rgb(48, 47, 47);
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px #0003, 0 25px 50px #0000001a;
+}
+
+main > form {
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid lightgray;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+main > div {
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid lightgray;
+}
+
+input, select {
+  font-family: inherit;
+  font-size: 100%;
+  width: 100%;
+  border: 0;
+}
+
+input:placeholder-shown {
+  font-style: italic;
+}
+
+button {
+  cursor: pointer;
+  padding: 0.5rem 0.5rem;
+  background-color: white;
+  font-family: inherit;
+  font-size: 85%;
+  line-height: inherit;
+  border: 2px solid #0000001a;
+  border-radius: 0.5rem;
+  white-space: nowrap;
+}
+</style>
