@@ -2,15 +2,13 @@
     <div>
       <h1>Consultas del Empleado</h1>
       <main>
-        <!-- Lista de consultas asociadas a un empleado -->
-        
+        <div v-for="consulta in consultas" :key="consulta.id_consulta">
           <p><strong>Fecha:</strong> {{ consulta.fecha_creacion }}</p>
           <p><strong>Consulta:</strong> {{ consulta.consulta }}</p>
           <p><strong>Respuesta:</strong> {{ consulta.respuesta }}</p>
           <p><strong>RUT Cliente:</strong> {{ consulta.rut_cliente }}</p>
   
-          <!-- Formulario para actualizar la respuesta -->
-          
+          <form @submit.prevent="updateRespuesta(consulta.id_consulta)">
             <input v-model="consulta.respuesta" placeholder="Nueva Respuesta" required />
             <button type="submit">Actualizar Respuesta</button>
           </form>
@@ -23,11 +21,62 @@
   import { ref, onMounted } from 'vue';
   import { useRoute } from 'vue-router';
   
+  const route = useRoute();
+  const consultas = ref([]);
   
+  async function fetchConsultas() {
+    try {
+      const rut_empleado = route.params.rut_empleado;
+      if (!rut_empleado) {
+        throw new Error('RUT Empleado no proporcionado');
+      }
+      
+      const response = await fetch(`/APIconsulta/consultas/empleado/${rut_empleado}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
   
+      if (!response.ok) {
+        throw new Error(`Error al obtener consultas: ${response.statusText}`);
+      }
   
-  // Obtener consultas al montar el componente
+      const data = await response.json();
+      consultas.value = data.consulta;  // Asegúrate de que el endpoint devuelve 'consulta' en singular
+    } catch (error) {
+      console.error('Error:', error);
+      alert(error.message);
+    }
+  }
   
+  async function updateRespuesta(id_consulta) {
+  const consulta = consultas.value.find(c => c.id_consulta === id_consulta);
+  try {
+    const response = await fetch(`/APIconsulta/consultas/update_respuesta/${id_consulta}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ consulta: { respuesta: consulta.respuesta } }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error al actualizar la respuesta: ${response.statusText} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    const index = consultas.value.findIndex(c => c.id_consulta === id_consulta);
+    consultas.value[index] = { ...consultas.value[index], ...data.consulta };
+  } catch (error) {
+    console.error('Error:', error);
+    alert(error.message);
+  }
+}
+
+  
+  onMounted(fetchConsultas);
   </script>
   
   <style scoped>

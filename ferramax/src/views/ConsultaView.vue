@@ -1,102 +1,104 @@
 <template>
-    <div>
-      <h1>Consultas</h1>
-      <main>
-        <!-- Formulario para agregar una nueva consulta -->
-        <form @submit.prevent="addConsulta">
-          <input v-model="newConsulta.fecha_creacion" type="date" placeholder="Fecha de creación" required />
-          <input v-model="newConsulta.consulta" placeholder="Consulta" required />
-          <input v-model="newConsulta.respuesta" placeholder="Respuesta" />
-          <input v-model="newConsulta.rut_cliente" placeholder="RUT Cliente" required />
-          <input v-model="newConsulta.rut_empleado" placeholder="RUT Empleado" required />
-          <button type="submit">Añadir</button>
-        </form>
-  
-        <!-- Lista de consultas -->
-        <div v-for="consulta in consultas" :key="consulta.id">
-          <p><strong>Fecha:</strong> {{ consulta.fecha_creacion }}</p>
-          <p><strong>Consulta:</strong> {{ consulta.consulta }}</p>
-          <p><strong>Respuesta:</strong> {{ consulta.respuesta }}</p>
-          <p><strong>RUT Cliente:</strong> {{ consulta.rut_cliente }}</p>  
-        </div>
-      </main>
-    </div>
-  </template>
-  
-  <script setup lang="ts">
-  import { ref, onMounted } from 'vue';
-  
-  // Datos de la nueva consulta
-  const newConsulta = ref({
-    fecha_creacion: '',
-    consulta: '',
-    respuesta: '',
-    rut_cliente: '',
-    rut_empleado: ''
-  });
-  
-  // Lista de consultas
-  const consultas = ref([]);
-  
-  // Función para obtener todas las consultas
-  async function fetchConsultas() {
-    try {
-      const response = await fetch('/APIconsulta/consultas', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-  
-      if (!response.ok) {
-        throw new Error(`Error al obtener consultas: ${response.statusText}`);
+  <div>
+    <h1>Consultas</h1>
+    <main>
+      <!-- Formulario para agregar una nueva consulta -->
+      <form @submit.prevent="addConsulta">
+        <input v-model="newConsulta.fecha_creacion" type="date" placeholder="Fecha de creación" required />
+        <input v-model="newConsulta.consulta" placeholder="Consulta" required />
+        <input v-model="newConsulta.respuesta" placeholder="Respuesta" />
+        <input v-model="newConsulta.rut_cliente" placeholder="RUT Cliente" required />        <button type="submit">Añadir</button>
+      </form>
+
+      <!-- Lista de consultas -->
+      <div v-for="consulta in consultas" :key="consulta.id_consulta">
+        <p><strong>Fecha:</strong> {{ consulta.fecha_creacion }}</p>
+        <p><strong>Consulta:</strong> {{ consulta.consulta }}</p>
+        <p><strong>Respuesta:</strong> {{ consulta.respuesta }}</p>
+        <p><strong>RUT Cliente:</strong> {{ consulta.rut_cliente }}</p>
+        <p><strong>RUT Empleado:</strong> {{ consulta.rut_empleado }}</p>
+
+        <!-- Enlace para ver las consultas del empleado -->
+        <router-link :to="{ name: 'respuesta', params: { rut_empleado: consulta.rut_empleado } }">Ver Consultas del Empleado</router-link>
+      </div>
+    </main>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
+
+// Datos de la nueva consulta
+const newConsulta = ref({
+  fecha_creacion: '',
+  consulta: '',
+  respuesta: '',
+  rut_cliente: '',
+  rut_empleado: ''
+});
+
+// Lista de consultas
+const consultas = ref([]);
+
+// Función para obtener todas las consultas
+async function fetchConsultas() {
+  try {
+    const response = await fetch('/APIconsulta/consultas', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
       }
-  
-      const data = await response.json();
-      consultas.value = data.consultas;
-    } catch (error) {
-      console.error('Error:', error);
-      alert(error.message);
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al obtener consultas: ${response.statusText}`);
     }
+
+    const data = await response.json();
+    consultas.value = data.consultas;
+  } catch (error) {
+    console.error('Error:', error);
+    alert(error.message);
   }
-  
-  // Función para añadir una consulta
-  async function addConsulta() {
-    try {
-      const response = await fetch('/APIconsulta/consultas/nueva_consulta/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ consulta: newConsulta.value })
-      });
-  
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Error al crear la consulta: ${response.statusText} - ${errorText}`);
-      }
-  
-      const data = await response.json();
-      consultas.value.push(data.consulta);
-  
-      // Limpiar formulario
-      newConsulta.value = {
-        fecha_creacion: '',
-        consulta: '',
-        respuesta: '',
-        rut_cliente: '',
-        rut_empleado: ''
-      };
-    } catch (error) {
-      console.error('Error:', error);
-      alert(error.message);
+}
+
+// Función para añadir una consulta
+async function addConsulta() {
+  try {
+    const response = await fetch('/APIconsulta/consultas/nueva_consulta/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newConsulta.value)
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error al crear la consulta: ${response.statusText} - ${errorText}`);
     }
+
+    const data = await response.json();
+    consultas.value.push(data.consulta);
+
+    // Limpiar formulario
+    newConsulta.value = {
+      fecha_creacion: '',
+      consulta: '',
+      respuesta: '',
+      rut_cliente: '',
+      rut_empleado: ''
+    };
+  } catch (error) {
+    console.error('Error:', error);
+    alert(error.message);
   }
-  
-  // Obtener consultas al montar el componente
-  onMounted(fetchConsultas);
-  </script>
-  
+}
+
+// Obtener consultas al montar el componente
+onMounted(fetchConsultas);
+</script>
+
   <style scoped>
   @charset "utf-8";
   
