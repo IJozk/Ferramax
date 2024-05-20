@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import SucursalView from '../views/SucursalView.vue';
+import RespuestaView from '../views/RespuestaView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,20 +21,16 @@ const router = createRouter({
       component: () => import('../views/ConsultaView.vue')
     },
     {
-      path: '/sucursalView',
-      name: 'SucursalView',
-      component: SucursalView
-    },
-    {
       path: '/stockView',
       name: 'stockView',
       component: () => import('../views/stockView.vue')
     },
     {
-      path: '/respuestaView',
-      name: 'respuestaView',
-      component: () => import('../views/RespuestaView.vue')
-    },
+      path: '/respuesta/:rut_empleado',
+      name: 'respuesta',
+      component: RespuestaView,
+      props: true
+    }
   ]
 })
 

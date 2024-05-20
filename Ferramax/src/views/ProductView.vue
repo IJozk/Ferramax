@@ -19,6 +19,15 @@
         <button type="submit">Añadir</button>
       </form>
 
+      <!-- Filtro de categoría -->
+      <label for="category">Seleccione una categoría: </label>
+      <select id="category" v-model="selectedCategory" @change="fetchProducts">
+        <option value="">Todas las categorías</option>
+        <option v-for="categoria in categorias" :key="categoria.id_categoria" :value="categoria.id_categoria">
+          {{ categoria.nombre_categoria }}
+        </option>
+      </select>
+
       <!-- Búsqueda de productos -->
       <div>
         <input v-model="searchId" placeholder="Ingrese código del producto" />
@@ -27,7 +36,7 @@
         <div v-if="!productFound && productos.length === 0">No hay productos disponibles</div>
         <div v-if="productFound && productos.length === 0">Producto no encontrado</div>
 
-        <div v-for="producto in productos" :key="producto.cod_producto">
+        <div v-for="producto in filteredProducts" :key="producto.cod_producto">
           <h3>ID: {{ producto.cod_producto }}</h3>
           <h3>Nombre: {{ producto.nombre_producto }} - {{ convertedPrice(producto.precio_actual) }}</h3>
           <p>Desc: {{ producto.descripcion_producto }}</p>
@@ -49,8 +58,9 @@
   </div>
 </template>
 
+
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 
 // Definición de tipos
 interface Categoria {
@@ -83,9 +93,11 @@ interface ExchangeRates {
 
 // Datos reactivos
 const productos = ref<Producto[]>([]);
+const categorias = ref<Categoria[]>([]);
 const searchId = ref<string>('');
 const productFound = ref<boolean>(true);
 const selectedCurrency = ref<string>('clp');
+const selectedCategory = ref<string>('');
 const exchangeRates = reactive<ExchangeRates>({
   dolar: 1,
   euro: 1,
@@ -98,7 +110,6 @@ const newProduct = reactive<NewProduct>({
   id_categoria: 0,
   marca: ""
 });
-const categorias = ref<Categoria[]>([]);
 
 // Métodos
 async function fetchProducts() {
@@ -210,6 +221,14 @@ async function addProduct() {
     alert(error.message);
   }
 }
+
+// Computed property para productos filtrados por categoría
+const filteredProducts = computed(() => {
+  if (selectedCategory.value) {
+    return productos.value.filter(producto => producto.id_categoria === parseInt(selectedCategory.value));
+  }
+  return productos.value;
+});
 
 // Llamar a las funciones al montar el componente
 onMounted(() => {

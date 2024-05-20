@@ -8,4 +8,6 @@ export class TipoEmpleado {
     nombre_tipoempleado = '';
     @Fields.string()
     descripcion_tipoempleado = '';
+    @Fields.number()
+    id_categoria = 0;
 }

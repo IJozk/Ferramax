@@ -14,6 +14,7 @@ import { Sucursal } from '../shared/sucursal';
 import { TipoEmpleado } from '../shared/tipo_empleado';
 import { UnidadProducto } from '../shared/unidad_producto';
 import { Usuario } from '../shared/usuario';
+
 import { remultExpress } from 'remult/remult-express'
 import { createKnexDataProvider } from 'remult/remult-knex';
 import dotenv from 'dotenv';
@@ -62,5 +63,5 @@ export const api = remultExpress({
     ], // Add entities to app
 
     admin: true, // Enable the Admin UI
+    
 })
-
