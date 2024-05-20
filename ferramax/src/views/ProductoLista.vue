@@ -2,11 +2,17 @@
   <div>
     <input v-model="searchId" placeholder="Ingrese código del producto" />
     <button @click="fetchProductById">Buscar Producto</button>
+    
+    <label for="category">Seleccione una categoría: </label>
+    <select id="category" v-model="selectedCategory" @change="fetchProducts">
+      <option value="">Todas las categorías</option>
+      <option v-for="categoria in categorias" :key="categoria" :value="categoria">{{ categoria }}</option>
+    </select>
 
     <div v-if="!productFound && productos.length === 0">No hay productos disponibles</div>
     <div v-if="productFound && productos.length === 0">Producto no encontrado</div>
 
-    <div v-for="producto in productos" :key="producto.cod_producto">
+    <div v-for="producto in filteredProducts" :key="producto.cod_producto">
       <h3>ID: {{ producto.cod_producto }}</h3>
       <h3>Nombre: {{ producto.nombre_producto }} - {{ convertedPrice(producto.precio_actual) }}</h3>
       <p>Desc: {{ producto.descripcion_producto }}</p>
@@ -15,7 +21,7 @@
     </div>
   </div>
   <footer>
-      <div>
+    <div>
       <label for="currency">Seleccione la divisa: </label>
       <select id="currency" v-model="selectedCurrency">
         <option value="clp">Pesos Chilenos (CLP)</option>
@@ -34,9 +40,11 @@ export default {
   data() {
     return {
       productos: [],
+      categorias: [],
       searchId: '',
       productFound: true,
       selectedCurrency: 'clp',
+      selectedCategory: '',
       exchangeRates: {
         dolar: 1,
         euro: 1,
@@ -57,6 +65,7 @@ export default {
         }
         const data = await response.json();
         this.productos = data.productos;
+        this.categorias = [...new Set(this.productos.map(producto => producto.categoria))]; // Obtener categorías únicas
       } catch (error) {
         console.error('Error fetching products:', error);
       }
@@ -107,6 +116,15 @@ export default {
       const currencySymbol = this.selectedCurrency === 'dolar' ? 'USD' : (this.selectedCurrency === 'euro' ? 'EUR' : 'CLP');
       return `${currencySymbol} ${converted.toFixed(2)}`;
     }
+  },
+  computed: {
+    filteredProducts() {
+      if (this.selectedCategory) {
+        return this.productos.filter(producto => producto.categoria === this.selectedCategory);
+      }
+      return this.productos;
+    }
   }
 };
+
 </script>
