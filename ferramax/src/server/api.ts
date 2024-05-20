@@ -1,3 +1,4 @@
+
 import { Boleta } from '../shared/boleta'
 import { Categoria } from '../shared/categoria';
 import { Cliente } from '../shared/cliente';
@@ -13,10 +14,12 @@ import { Sucursal } from '../shared/sucursal';
 import { TipoEmpleado } from '../shared/tipo_empleado';
 import { UnidadProducto } from '../shared/unidad_producto';
 import { Usuario } from '../shared/usuario';
-
 import { remultExpress } from 'remult/remult-express'
 import { createKnexDataProvider } from 'remult/remult-knex';
 import dotenv from 'dotenv';
+import { Categoria } from '../shared/categoria';
+import { Cliente } from '../shared/cliente';
+
 
 dotenv.config();
 
@@ -58,6 +61,7 @@ export const api = remultExpress({
         UnidadProducto,
         Usuario
     ], // Add entities to app
+
     admin: true, // Enable the Admin UI
 })
 
