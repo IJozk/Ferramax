@@ -26,16 +26,11 @@ const router = createRouter({
       component: () => import('../views/stockView.vue')
     },
     {
-      path: '/productManagement',
-      name: 'productManagement',
-      component: () => import('../views/ProductManagements.vue')
-    },
-    {
       path: '/respuesta/:rut_empleado',
       name: 'respuesta',
       component: RespuestaView,
       props: true
-    },
+    }
   ]
 })
 
