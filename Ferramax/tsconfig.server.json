@@ -7,7 +7,7 @@
       "rootDir": "src",
       "module": "nodenext"
     },
-    "include": ["src/server/**/*", "src/shared/**/*"],
+    "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
     "paths": {
         "@/*": ["./src/*"]
       }

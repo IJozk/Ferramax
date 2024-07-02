@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView } from 'vue-router';
+import { useAuth } from '@/composables/useAuth';
 
+const { isAuthenticated, logout } = useAuth();
 </script>
 
 <template>
@@ -10,12 +12,14 @@ import { RouterLink, RouterView } from 'vue-router'
     <div class="wrapper">
       <HelloWorld msg="You did it!" />
 
-      <strong>Path route: </strong> {{ $route.fullPath }}
       <nav>
         <RouterLink to="/about">About</RouterLink>
         <RouterLink to="/productos">Productos</RouterLink>
         <RouterLink to="/consultaView">consultaView</RouterLink>
         <RouterLink to="/stockView">stockView</RouterLink>
+        <RouterLink to="/webpay">Webpay</RouterLink>
+        <RouterLink v-if="!isAuthenticated" to="/login">Login</RouterLink>
+        <button v-if="isAuthenticated" @click="logout">Logout</button>
       </nav>
     </div>
   </header>
@@ -80,7 +84,6 @@ nav a:first-of-type {
     text-align: left;
     margin-left: -1rem;
     font-size: 1rem;
-
     padding: 1rem 0;
     margin-top: 1rem;
   }

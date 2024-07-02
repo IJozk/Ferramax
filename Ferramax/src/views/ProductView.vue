@@ -111,10 +111,21 @@ const newProduct = reactive<NewProduct>({
   marca: ""
 });
 
+
 // Métodos
 async function fetchProducts() {
+  const apiKey = localStorage.getItem('api_key');
+  const userId = localStorage.getItem('id_usuario');
   try {
-    const response = await fetch('/apiProducto/productos');
+    
+    console.log(apiKey);
+    const response = await fetch(`/apiProducto/productos/all_prods/`, {
+      method: 'GET',
+      headers: {
+        'id_usuario': String(userId),
+        'api_key': String(apiKey),
+      }
+    });
     if (!response.ok) {
       throw new Error('Network response was not ok ' + response.statusText);
     }
@@ -126,8 +137,16 @@ async function fetchProducts() {
 }
 
 async function fetchProductById() {
+  const apiKey = localStorage.getItem('api_key');
+  const userId = localStorage.getItem('id_usuario');
   try {
-    const response = await fetch(`/apiProducto/productos/producto/${searchId.value}`);
+    const response = await fetch(`/apiProducto/productos/producto/${searchId.value}`, {
+      method: 'GET',
+      headers: {
+        'id_usuario': String(userId),
+        'api_key': String(apiKey),
+      }
+    });
     if (!response.ok) {
       throw new Error('Network response was not ok ' + response.statusText);
     }

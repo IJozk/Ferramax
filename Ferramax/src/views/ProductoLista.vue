@@ -32,99 +32,130 @@
   </footer>
 </template>
 
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
+const searchId = ref('');
+const productos = ref([]);
+const categorias = ref([]);
+const productFound = ref(true);
+const selectedCurrency = ref('clp');
+const selectedCategory = ref('');
+const exchangeRates = ref({
+  dolar: 1,
+  euro: 1,
+  clp: 1
+});
 
+const router = useRouter();
 
-<script>
-export default {
-  data() {
-    return {
-      productos: [],
-      categorias: [],
-      searchId: '',
-      productFound: true,
-      selectedCurrency: 'clp',
-      selectedCategory: '',
-      exchangeRates: {
-        dolar: 1,
-        euro: 1,
-        clp: 1
+const fetchProducts = async () => {
+  const apiKey = localStorage.getItem('api_key');
+  const userId = localStorage.getItem('id_usuario');
+
+  if (!apiKey || !userId) {
+    console.error('API key or User ID not found in localStorage');
+    return;
+  }
+
+  try {
+    const response = await fetch('/apiProducto/productos/all_prods/', {
+      method: 'GET',
+      headers: {
+        'id_usuario': userId,
+        'api_key': apiKey,
       }
-    };
-  },
-  created() {
-    this.fetchProducts();
-    this.fetchExchangeRates();
-  },
-  methods: {
-    async fetchProducts() {
-      try {
-        const response = await fetch('/apiProducto/productos');
-        if (!response.ok) {
-          throw new Error('Network response was not ok ' + response.statusText);
-        }
-        const data = await response.json();
-        this.productos = data.productos;
-        this.categorias = [...new Set(this.productos.map(producto => producto.categoria))]; // Obtener categorías únicas
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      }
-    },
-    async fetchProductById() {
-      try {
-        const response = await fetch(`/apiProducto/productos/producto/${this.searchId}`);
-        if (!response.ok) {
-          throw new Error('Network response was not ok ' + response.statusText);
-        }
-        const data = await response.json();
-        this.productos = data.producto ? [data.producto] : [];
-        this.productFound = !!data.producto;
-      } catch (error) {
-        this.productos = [];
-        this.productFound = false;
-        console.error('Error fetching product:', error);
-      }
-    },
-    async fetchExchangeRates() {
-      try {
-        const response = await fetch('https://mindicador.cl/api');
-        if (!response.ok) {
-          throw new Error('Network response was not ok ' + response.statusText);
-        }
-        const data = await response.json();
-        this.exchangeRates.dolar = data.dolar.valor;
-        this.exchangeRates.euro = data.euro.valor;
-        this.exchangeRates.clp = 1; // 1 CLP es igual a 1 CLP
-        console.log('Exchange rates loaded:', this.exchangeRates); // Debugging line
-      } catch (error) {
-        console.error('Error fetching exchange rates:', error);
-      }
-    },
-    convertedPrice(price) {
-      console.log('Converting price:', price, 'Currency:', this.selectedCurrency); // Debugging line
-      const rate = this.exchangeRates[this.selectedCurrency];
-      if (!rate) {
-        console.error('Exchange rate not found for currency:', this.selectedCurrency);
-        return 'N/A';
-      }
-      console.log('Using exchange rate:', rate); // Debugging line
-      let converted = parseFloat(price);
-      if (this.selectedCurrency !== 'clp') {
-        converted = converted / rate;
-      }
-      console.log('Converted price:', converted); // Debugging line
-      const currencySymbol = this.selectedCurrency === 'dolar' ? 'USD' : (this.selectedCurrency === 'euro' ? 'EUR' : 'CLP');
-      return `${currencySymbol} ${converted.toFixed(2)}`;
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-  },
-  computed: {
-    filteredProducts() {
-      if (this.selectedCategory) {
-        return this.productos.filter(producto => producto.categoria === this.selectedCategory);
-      }
-      return this.productos;
-    }
+    const data = await response.json();
+    productos.value = data.productos;
+    categorias.value = [...new Set(productos.value.map(producto => producto.categoria))];
+  } catch (error) {
+    console.error('Error fetching products:', error);
   }
 };
 
+const fetchProductById = async () => {
+  const apiKey = localStorage.getItem('api_key');
+  const userId = localStorage.getItem('id_usuario');
+
+  if (!apiKey || !userId) {
+    console.error('API key or User ID not found in localStorage');
+    return;
+  }
+
+  try {
+    const response = await fetch(`/apiProducto/productos/producto/${searchId.value}`, {
+      method: 'GET',
+      headers: {
+        'id_usuario': userId,
+        'api_key': apiKey
+      }
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    productos.value = data.producto ? [data.producto] : [];
+    productFound.value = !!data.producto;
+  } catch (error) {
+    productos.value = [];
+    productFound.value = false;
+    console.error('Error fetching product:', error);
+  }
+};
+
+const fetchExchangeRates = async () => {
+  try {
+    const response = await fetch('https://mindicador.cl/api');
+    if (!response.ok) {
+      throw new Error('Network response was not ok ' + response.statusText);
+    }
+    const data = await response.json();
+    exchangeRates.value.dolar = data.dolar.valor;
+    exchangeRates.value.euro = data.euro.valor;
+    exchangeRates.value.clp = 1; // 1 CLP es igual a 1 CLP
+  } catch (error) {
+    console.error('Error fetching exchange rates:', error);
+  }
+};
+
+const convertedPrice = (price) => {
+  const rate = exchangeRates.value[selectedCurrency.value];
+  if (!rate) {
+    return 'N/A';
+  }
+  let converted = parseFloat(price);
+  if (selectedCurrency.value !== 'clp') {
+    converted = converted / rate;
+  }
+  const currencySymbol = selectedCurrency.value === 'dolar' ? 'USD' : (selectedCurrency.value === 'euro' ? 'EUR' : 'CLP');
+  return `${currencySymbol} ${converted.toFixed(2)}`;
+};
+
+const filteredProducts = computed(() => {
+  if (selectedCategory.value) {
+    return productos.value.filter(producto => producto.categoria === selectedCategory.value);
+  }
+  return productos.value;
+});
+
+onMounted(() => {
+  fetchProducts();
+  fetchExchangeRates();
+});
 </script>
+
+<style scoped>
+.login {
+  max-width: 300px;
+  margin: auto;
+}
+
+.error {
+  color: red;
+}
+</style>
