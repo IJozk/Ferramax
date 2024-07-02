@@ -2,7 +2,7 @@ import { Entity, Fields } from "remult";
 
 @Entity('detalle_boleta', { allowApiCrud: true })
 export class DetalleBoleta {
-    @Fields.autoIncrement()
+    @Fields.integer()
     id = 0; // Adding an id field as primary key
     @Fields.number()
     cantidad = 0;

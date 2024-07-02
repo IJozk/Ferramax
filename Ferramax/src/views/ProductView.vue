@@ -41,8 +41,22 @@
           <h3>Nombre: {{ producto.nombre_producto }} - {{ convertedPrice(producto.precio_actual) }}</h3>
           <p>Desc: {{ producto.descripcion_producto }}</p>
           <p>Marca: {{ producto.marca }}</p>
+          <button @click="addToCart(producto)">Añadir al carrito</button>
           <p>-------------------------------------------------------</p>
         </div>
+      </div>
+
+      <!-- Carrito de compra -->
+      <h2>Carrito de compra</h2>
+      <div v-if="cartItems.length === 0">El carrito está vacío</div>
+      <div v-else>
+        <div v-for="item in cartItems" :key="item.product.cod_producto">
+          <h3>{{ item.product.nombre_producto }} - {{ convertedPrice(item.product.precio_actual) }}</h3>
+          <p>Cantidad: {{ item.quantity }}</p>
+          <p>Precio Total: {{ convertedPrice(item.product.precio_actual * item.quantity) }}</p>
+          <p>-------------------------------------------------------</p>
+        </div>
+        <h3>Total del Carrito: {{ convertedPrice(cartTotal) }}</h3>
       </div>
     </main>
     <footer>
@@ -54,15 +68,22 @@
           <option value="euro">Euro (EUR)</option>
         </select>
       </div>
+      <div>
+        <form @submit.prevent="processPayment">
+        <input v-model="paymentData.cardNumber" placeholder="Número de tarjeta" required />
+        <input v-model="paymentData.expiryDate" placeholder="Fecha de expiración (MM/YY)" required />
+        <input v-model="paymentData.cvc" placeholder="CVC" required />
+        <button type="submit">Pagar</button>
+        </form>
+      </div>
     </footer>
   </div>
 </template>
 
-
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue';
 
-// Definición de tipos
+
 interface Categoria {
   id_categoria: number;
   nombre_categoria: string;
@@ -75,6 +96,7 @@ interface Producto {
   precio_actual: number;
   descripcion_producto: string;
   marca: string;
+  id_categoria: number;
 }
 
 interface NewProduct {
@@ -89,6 +111,11 @@ interface ExchangeRates {
   dolar: number;
   euro: number;
   clp: number;
+}
+
+interface CartItem {
+  product: Producto;
+  quantity: number;
 }
 
 // Datos reactivos
@@ -110,6 +137,7 @@ const newProduct = reactive<NewProduct>({
   id_categoria: 0,
   marca: ""
 });
+const cartItems = reactive<CartItem[]>([]);
 
 
 // Métodos
@@ -241,12 +269,110 @@ async function addProduct() {
   }
 }
 
+function addToCart(product: Producto) {
+  const existingItem = cartItems.find(item => item.product.cod_producto === product.cod_producto);
+  if (existingItem) {
+    existingItem.quantity += 1;
+  } else {
+    cartItems.push({ product, quantity: 1 });
+  }
+}
+
+
+// Datos reactivos para el formulario de pago
+const paymentData = reactive({
+  cardNumber: '',
+  expiryDate: '',
+  cvc: ''
+});
+
+// Datos de autenticación para la API de WebPay
+const apiKeyId = '597055555532';
+const apiKeySecret = '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C';
+
+
+// Método para crear una transacción con WebPay
+async function createTransaction() {
+  try {
+    // Validar los datos del formulario de pago
+    if (!paymentData.cardNumber || !paymentData.expiryDate || !paymentData.cvc) {
+      throw new Error('Por favor, complete todos los campos del formulario de pago.');
+    }
+
+    // Construir el cuerpo de la solicitud para crear la transacción
+    const requestBody = {
+      cardNumber: paymentData.cardNumber,
+      expiryDate: paymentData.expiryDate,
+      cvc: paymentData.cvc
+      // Otros datos requeridos por la API de WebPay para crear la transacción
+    };
+
+    // Enviar solicitud para crear una transacción
+    const transactionResponse = await fetch('https://webpay3gint.transbank.cl/rswebpaytransaction/api/webpay/v1.2/transactions', {
+      method: 'POST',
+      headers: {
+        'Tbk-Api-Key-Id': apiKeyId,
+        'Tbk-Api-Key-Secret': apiKeySecret,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    // Verificar si se creó la transacción correctamente
+    if (!transactionResponse.ok) {
+      throw new Error('Hubo un error al crear la transacción. Por favor, inténtelo de nuevo más tarde.');
+    }
+
+    // Extraer el ID de la transacción de la respuesta
+    const { transactionId } = await transactionResponse.json();
+    console.log(transactionId);
+    // Procesar el pago utilizando el ID de la transacción
+    await processPayment(transactionId);
+  } catch (error) {
+    console.error('Error al crear la transacción:', error);
+    // Mostrar mensaje de error al usuario
+    alert('Se produjo un error al crear la transacción. Por favor, inténtelo de nuevo más tarde.');
+  }
+}
+
+// Método para procesar el pago con WebPay utilizando el ID de la transacción
+async function processPayment(transactionId: string) {
+  try {
+    // Simular el envío del ID de la transacción para procesar el pago
+    const response = await fetch(`https://api.webpay.com/transactions/${transactionId}/pay`, {
+      method: 'POST',
+      headers: {
+        'Tbk-Api-Key-Id': apiKeyId,
+        'Tbk-Api-Key-Secret': apiKeySecret,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    // Verificar si la transacción de pago fue exitosa
+    if (!response.ok) {
+      throw new Error('Hubo un error al procesar el pago. Por favor, inténtelo de nuevo más tarde.');
+    }
+
+    // Mostrar mensaje de éxito al usuario
+    alert('¡El pago se ha procesado correctamente!');
+  } catch (error) {
+    console.error('Error al procesar el pago:', error);
+    // Mostrar mensaje de error al usuario
+    alert('Se produjo un error al procesar el pago. Por favor, inténtelo de nuevo más tarde.');
+  }
+}
+
 // Computed property para productos filtrados por categoría
 const filteredProducts = computed(() => {
   if (selectedCategory.value) {
     return productos.value.filter(producto => producto.id_categoria === parseInt(selectedCategory.value));
   }
   return productos.value;
+});
+
+// Computed property para calcular el total del carrito
+const cartTotal = computed(() => {
+  return cartItems.reduce((total, item) => total + item.product.precio_actual * item.quantity, 0);
 });
 
 // Llamar a las funciones al montar el componente

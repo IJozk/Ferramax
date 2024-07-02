@@ -1,4 +1,6 @@
 import express from "express";
+import axios from "axios";
+import bodyParser from "body-parser";
 import { api } from "./api";
 import { Remult } from 'remult';
 import { TipoEmpleado } from "../shared/tipo_empleado";
@@ -7,6 +9,7 @@ import { Empleado } from "../shared/empleado";
 const app = express();
 const remult = new Remult();
 
+app.use(bodyParser.json()); // Middleware to parse JSON requests
 app.use(api);
 
 app.get("/api/hi", (req, res) => res.send("Hello"));
@@ -32,4 +35,24 @@ app.get('/api/empleados/:id_categoria', async (req, res) => {
     }
 });
 
-app.listen(3002, () => console.log("started :)"));
+// Webpay Integration Endpoint
+app.post('/api/webpay/create-transaction', async (req, res) => {
+    const { amount, returnUrl } = req.body;
+
+    try {
+        // Make a request to Webpay API to create a transaction
+        const response = await axios.post('https://webpay.api.url', {
+            amount,
+            returnUrl,
+            // Add other necessary parameters and credentials for Webpay API
+        });
+
+        // Respond with the redirect URL to complete the payment
+        res.json({ redirectUrl: response.data.redirectUrl });
+    } catch (error) {
+        console.error('Error creating Webpay transaction:', error);
+        res.status(500).send('Error creating Webpay transaction');
+    }
+});
+
+app.listen(3002, () => console.log("Server started on port 3002"));
