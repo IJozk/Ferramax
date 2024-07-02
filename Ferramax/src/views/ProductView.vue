@@ -69,19 +69,22 @@
         </select>
       </div>
       <div>
-        <form @submit.prevent="processPayment">
-        <input v-model="paymentData.cardNumber" placeholder="Número de tarjeta" required />
-        <input v-model="paymentData.expiryDate" placeholder="Fecha de expiración (MM/YY)" required />
-        <input v-model="paymentData.cvc" placeholder="CVC" required />
-        <button type="submit">Pagar</button>
-        </form>
+        <button @click="pago">Pagar</button>
       </div>
     </footer>
   </div>
 </template>
 
 <script setup lang="ts">
+import { response } from 'express';
 import { ref, reactive, onMounted, computed } from 'vue';
+// SDK de Mercado Pago
+import { MercadoPagoConfig, Payment } from 'mercadopago';
+// Agrega credenciales
+const client = new MercadoPagoConfig({ accessToken: 'TEST-2009681591890148-070207-4afd66d446cc2506de0108d4abb7b86b-305841050', options: { timeout: 5000, idempotencyKey: 'abc' } });
+
+const payment = new Payment(client);
+
 
 
 interface Categoria {
@@ -278,6 +281,28 @@ function addToCart(product: Producto) {
   }
 }
 
+async function pago(){
+  try{
+
+      const body = {
+      transaction_amount: 12.34,
+      description: 'Pago Ferramax prueba',
+      payment_method_id: 'credit_card',
+      payer: {
+        email: 'contacto@ferramax.cl'
+      },  
+    };
+
+  const resp = await payment.create({ body }).then(console.log).catch(console.log);
+
+  console.log(resp);
+
+  } catch (error){
+    console.error('Error:', error);
+    alert(error.message);
+  }
+}  
+
 
 // Datos reactivos para el formulario de pago
 const paymentData = reactive({
@@ -286,81 +311,6 @@ const paymentData = reactive({
   cvc: ''
 });
 
-// Datos de autenticación para la API de WebPay
-const apiKeyId = '597055555532';
-const apiKeySecret = '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C';
-
-
-// Método para crear una transacción con WebPay
-async function createTransaction() {
-  try {
-    // Validar los datos del formulario de pago
-    if (!paymentData.cardNumber || !paymentData.expiryDate || !paymentData.cvc) {
-      throw new Error('Por favor, complete todos los campos del formulario de pago.');
-    }
-
-    // Construir el cuerpo de la solicitud para crear la transacción
-    const requestBody = {
-      cardNumber: paymentData.cardNumber,
-      expiryDate: paymentData.expiryDate,
-      cvc: paymentData.cvc
-      // Otros datos requeridos por la API de WebPay para crear la transacción
-    };
-
-    // Enviar solicitud para crear una transacción
-    const transactionResponse = await fetch('https://webpay3gint.transbank.cl/rswebpaytransaction/api/webpay/v1.2/transactions', {
-      method: 'POST',
-      headers: {
-        'Tbk-Api-Key-Id': apiKeyId,
-        'Tbk-Api-Key-Secret': apiKeySecret,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestBody)
-    });
-
-    // Verificar si se creó la transacción correctamente
-    if (!transactionResponse.ok) {
-      throw new Error('Hubo un error al crear la transacción. Por favor, inténtelo de nuevo más tarde.');
-    }
-
-    // Extraer el ID de la transacción de la respuesta
-    const { transactionId } = await transactionResponse.json();
-    console.log(transactionId);
-    // Procesar el pago utilizando el ID de la transacción
-    await processPayment(transactionId);
-  } catch (error) {
-    console.error('Error al crear la transacción:', error);
-    // Mostrar mensaje de error al usuario
-    alert('Se produjo un error al crear la transacción. Por favor, inténtelo de nuevo más tarde.');
-  }
-}
-
-// Método para procesar el pago con WebPay utilizando el ID de la transacción
-async function processPayment(transactionId: string) {
-  try {
-    // Simular el envío del ID de la transacción para procesar el pago
-    const response = await fetch(`https://api.webpay.com/transactions/${transactionId}/pay`, {
-      method: 'POST',
-      headers: {
-        'Tbk-Api-Key-Id': apiKeyId,
-        'Tbk-Api-Key-Secret': apiKeySecret,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    // Verificar si la transacción de pago fue exitosa
-    if (!response.ok) {
-      throw new Error('Hubo un error al procesar el pago. Por favor, inténtelo de nuevo más tarde.');
-    }
-
-    // Mostrar mensaje de éxito al usuario
-    alert('¡El pago se ha procesado correctamente!');
-  } catch (error) {
-    console.error('Error al procesar el pago:', error);
-    // Mostrar mensaje de error al usuario
-    alert('Se produjo un error al procesar el pago. Por favor, inténtelo de nuevo más tarde.');
-  }
-}
 
 // Computed property para productos filtrados por categoría
 const filteredProducts = computed(() => {

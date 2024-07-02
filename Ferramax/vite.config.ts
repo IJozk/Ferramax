@@ -23,6 +23,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/APIconsulta/, '')
       },
+      "/apimercado": {
+        target: 'https://api.mercadopago.com/v1/payments',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/apimercado/, '')
+      },
       "/api": "http://localhost:3002"
     }
   }

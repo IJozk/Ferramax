@@ -17,7 +17,6 @@ const { isAuthenticated, logout } = useAuth();
         <RouterLink to="/productos">Productos</RouterLink>
         <RouterLink to="/consultaView">consultaView</RouterLink>
         <RouterLink to="/stockView">stockView</RouterLink>
-        <RouterLink to="/webpay">Webpay</RouterLink>
         <RouterLink v-if="!isAuthenticated" to="/login">Login</RouterLink>
         <button v-if="isAuthenticated" @click="logout">Logout</button>
       </nav>
