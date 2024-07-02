@@ -76,15 +76,9 @@
 </template>
 
 <script setup lang="ts">
-import { response } from 'express';
 import { ref, reactive, onMounted, computed } from 'vue';
 // SDK de Mercado Pago
 import { MercadoPagoConfig, Payment } from 'mercadopago';
-// Agrega credenciales
-const client = new MercadoPagoConfig({ accessToken: 'TEST-2009681591890148-070207-4afd66d446cc2506de0108d4abb7b86b-305841050', options: { timeout: 5000, idempotencyKey: 'abc' } });
-
-const payment = new Payment(client);
-
 
 
 interface Categoria {
@@ -122,34 +116,42 @@ interface CartItem {
 }
 
 // Datos reactivos
-const productos = ref<Producto[]>([]);
-const categorias = ref<Categoria[]>([]);
-const searchId = ref<string>('');
-const productFound = ref<boolean>(true);
-const selectedCurrency = ref<string>('clp');
-const selectedCategory = ref<string>('');
-const exchangeRates = reactive<ExchangeRates>({
+const productos = ref([]);
+const categorias = ref([]);
+const searchId = ref('');
+const productFound = ref(true);
+const selectedCurrency = ref('clp');
+const selectedCategory = ref('');
+const exchangeRates = reactive({
   dolar: 1,
   euro: 1,
   clp: 1
 });
-const newProduct = reactive<NewProduct>({
+const newProduct = reactive({
   nombre_producto: "",
   precio_actual: 0,
   descripcion_producto: "",
   id_categoria: 0,
   marca: ""
 });
-const cartItems = reactive<CartItem[]>([]);
+const cartItems = reactive([]);
 
+// Inicializar el SDK de Mercado Pago
+let mp: any;
+
+onMounted(() => {
+  fetchProducts();
+  fetchExchangeRates();
+  fetchCategorias();
+
+  mp = new MercadoPagoConfig({ accessToken: 'TEST-e8bcfa9a-08fe-445a-9585-4bf37655d3d3'});
+});
 
 // Métodos
 async function fetchProducts() {
   const apiKey = localStorage.getItem('api_key');
   const userId = localStorage.getItem('id_usuario');
   try {
-    
-    console.log(apiKey);
     const response = await fetch(`/apiProducto/productos/all_prods/`, {
       method: 'GET',
       headers: {
@@ -201,7 +203,6 @@ async function fetchExchangeRates() {
     exchangeRates.dolar = data.dolar.valor;
     exchangeRates.euro = data.euro.valor;
     exchangeRates.clp = 1; // 1 CLP es igual a 1 CLP
-    console.log('Exchange rates loaded:', exchangeRates); // Debugging line
   } catch (error) {
     console.error('Error fetching exchange rates:', error);
   }
@@ -224,18 +225,15 @@ function convertedPrice(price: number): string {
   if (price == null) {
     return 'N/A';
   }
-  console.log('Converting price:', price, 'Currency:', selectedCurrency.value); // Debugging line
   const rate = exchangeRates[selectedCurrency.value];
   if (!rate) {
     console.error('Exchange rate not found for currency:', selectedCurrency.value);
     return 'N/A';
   }
-  console.log('Using exchange rate:', rate); // Debugging line
   let converted = parseFloat(price.toString());
   if (selectedCurrency.value !== 'clp') {
     converted = converted / rate;
   }
-  console.log('Converted price:', converted); // Debugging line
   const currencySymbol = selectedCurrency.value === 'dolar' ? 'USD' : (selectedCurrency.value === 'euro' ? 'EUR' : 'CLP');
   return `${currencySymbol} ${converted.toFixed(2)}`;
 }
@@ -281,38 +279,52 @@ function addToCart(product: Producto) {
   }
 }
 
-async function pago(){
-  try{
+async function pago() {
+  try {
+    const cartTotal = cartItems.reduce((total, item) => total + item.product.precio_actual * item.quantity, 0);
 
-      const body = {
-      transaction_amount: 12.34,
-      description: 'Pago Ferramax prueba',
-      payment_method_id: 'credit_card',
+    
+
+    const orderData = {
+      transaction_amount: cartTotal,
+      description: 'Compra en Ferramax',
+      payment_method_id: 'tarjeta_credito', 
       payer: {
-        email: 'contacto@ferramax.cl'
-      },  
+        email: 'jozk23@gmail.com' 
+      }
     };
 
-  const resp = await payment.create({ body }).then(console.log).catch(console.log);
+    // Crear preferencia de pago
+    const response = await fetch('/apimercado', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(orderData)
+    });
 
-  console.log(resp);
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error al crear la preferencia: ${errorText}`);
+    }
 
-  } catch (error){
-    console.error('Error:', error);
+    console.log('response');
+
+    const data = await response.json();
+    const preferenceId = data.preference_id;
+
+    mp.checkout({
+      preference: {
+        id: preferenceId
+      }
+    }).open();
+  } catch (error) {
+    console.error('Error al procesar el pago:', error);
     alert(error.message);
   }
-}  
+}
 
-
-// Datos reactivos para el formulario de pago
-const paymentData = reactive({
-  cardNumber: '',
-  expiryDate: '',
-  cvc: ''
-});
-
-
-// Computed property para productos filtrados por categoría
+// Computed properties y otras funciones reactivas
 const filteredProducts = computed(() => {
   if (selectedCategory.value) {
     return productos.value.filter(producto => producto.id_categoria === parseInt(selectedCategory.value));
@@ -320,16 +332,8 @@ const filteredProducts = computed(() => {
   return productos.value;
 });
 
-// Computed property para calcular el total del carrito
 const cartTotal = computed(() => {
   return cartItems.reduce((total, item) => total + item.product.precio_actual * item.quantity, 0);
-});
-
-// Llamar a las funciones al montar el componente
-onMounted(() => {
-  fetchProducts();
-  fetchExchangeRates();
-  fetchCategorias();
 });
 </script>
 
