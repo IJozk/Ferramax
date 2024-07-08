@@ -77,8 +77,8 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue';
-// SDK de Mercado Pago
-import { MercadoPagoConfig, Payment } from 'mercadopago';
+import MercadoPago from 'mercadopago';
+import { Payment } from 'mercadopago';
 
 
 interface Categoria {
@@ -120,6 +120,7 @@ const productos = ref([]);
 const categorias = ref([]);
 const searchId = ref('');
 const productFound = ref(true);
+const respuestapago = ref(true);
 const selectedCurrency = ref('clp');
 const selectedCategory = ref('');
 const exchangeRates = reactive({
@@ -136,15 +137,11 @@ const newProduct = reactive({
 });
 const cartItems = reactive([]);
 
-// Inicializar el SDK de Mercado Pago
-let mp: any;
 
 onMounted(() => {
   fetchProducts();
   fetchExchangeRates();
   fetchCategorias();
-
-  mp = new MercadoPagoConfig({ accessToken: 'TEST-e8bcfa9a-08fe-445a-9585-4bf37655d3d3'});
 });
 
 // Métodos
@@ -235,30 +232,26 @@ function convertedPrice(price: number): string {
     converted = converted / rate;
   }
   const currencySymbol = selectedCurrency.value === 'dolar' ? 'USD' : (selectedCurrency.value === 'euro' ? 'EUR' : 'CLP');
-  return `${currencySymbol} ${converted.toFixed(2)}`;
+  return `${converted.toFixed(2)} ${currencySymbol}`;
 }
 
 async function addProduct() {
+  const apiKey = localStorage.getItem('api_key');
+  const userId = localStorage.getItem('id_usuario');
   try {
-    const response = await fetch('/apiProducto/productos/new_product/', {
+    const response = await fetch(`/apiProducto/productos/add_product`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'id_usuario': String(userId),
+        'api_key': String(apiKey),
       },
-      body: JSON.stringify({ producto: newProduct })
+      body: JSON.stringify(newProduct)
     });
-
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Error al crear el producto: ${response.statusText} - ${errorText}`);
+      throw new Error('Network response was not ok ' + response.statusText);
     }
-
-    const data = await response.json();
-
-    // Añadir el nuevo producto a la lista de productos
-    productos.value.push(data.producto);
-
-    // Limpiar formulario
+    await fetchProducts();
     newProduct.nombre_producto = "";
     newProduct.precio_actual = 0;
     newProduct.descripcion_producto = "";
@@ -279,48 +272,51 @@ function addToCart(product: Producto) {
   }
 }
 
+// Función para generar una UUID
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 async function pago() {
   try {
-    const cartTotal = cartItems.reduce((total, item) => total + item.product.precio_actual * item.quantity, 0);
+    const idempotencyKey = generateUUID(); 
 
-    
+    const response = await fetch(`https://api.mercadopago.com/v1/payments/`, {
 
-    const orderData = {
-      transaction_amount: cartTotal,
-      description: 'Compra en Ferramax',
-      payment_method_id: 'tarjeta_credito', 
-      payer: {
-        email: 'jozk23@gmail.com' 
-      }
-    };
+      
 
-    // Crear preferencia de pago
-    const response = await fetch('/apimercado', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Idempotency-Key': idempotencyKey,
       },
-      body: JSON.stringify(orderData)
+      body: JSON.stringify( 
+        {
+            token: "duiashduhasiuh213",
+            transaction_amount: 1000,
+            description: "Prueba de pago desde Postman",
+            installments: 1,
+            payer: {
+                email: "test_user_123456@testuser.com"
+            }
+        }
+      )
+            
     });
-
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Error al crear la preferencia: ${errorText}`);
+      throw new Error('Network response was not ok ' + response.statusText);
     }
-
-    console.log('response');
-
     const data = await response.json();
-    const preferenceId = data.preference_id;
+    respuestapago.value = data.respuesta ? data.respuesta : [];
 
-    mp.checkout({
-      preference: {
-        id: preferenceId
-      }
-    }).open();
+    console.log(respuestapago.value );
+
   } catch (error) {
-    console.error('Error al procesar el pago:', error);
-    alert(error.message);
+    respuestapago.value = false;
+    console.error('Error fetching respueta pago:', error);
   }
 }
 
@@ -335,6 +331,7 @@ const filteredProducts = computed(() => {
 const cartTotal = computed(() => {
   return cartItems.reduce((total, item) => total + item.product.precio_actual * item.quantity, 0);
 });
+
 </script>
 
 <style scoped>
